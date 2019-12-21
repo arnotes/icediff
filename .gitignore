@@ -10,6 +10,7 @@
 
 # production
 /build
+/build-desktop
 
 # misc
 .DS_Store
