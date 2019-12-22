@@ -1,16 +1,20 @@
 import * as monaco from 'monaco-editor';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { fromEvent } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 interface Props {
   beforeFile?:string;
   afterFile?:string;
 }
 
+const editorStyle:React.CSSProperties = {
+  height:`calc(100vh - ${115}px)`
+}
+
 const DiffViewer: React.FC<Props> = (props) => {
   const divRef = useRef<HTMLDivElement>();
   const diffEditorRef = useRef<monaco.editor.IStandaloneDiffEditor>();
-  // eslint-disable-next-line
-  const [height, setHeight] = useState(0);
 
   useEffect(()=>{
     if(!divRef.current){
@@ -20,7 +24,13 @@ const DiffViewer: React.FC<Props> = (props) => {
     diffEditorRef.current = monaco.editor.createDiffEditor(divRef.current, {
       theme:'vs-dark',
     });
-    return ()=>diffEditorRef?.current?.dispose();
+    const resizeSub = fromEvent(window,'resize')
+                      .pipe(debounceTime(500))
+                      .subscribe(()=>diffEditorRef?.current?.layout());
+    return ()=>{
+      diffEditorRef?.current?.dispose();
+      resizeSub.unsubscribe();
+    };
   },[])
 
   useEffect(()=>{
@@ -41,7 +51,7 @@ const DiffViewer: React.FC<Props> = (props) => {
 
   return (
     <div className="DiffViewer">
-      <div style={{height:height+400+'px'}} ref={divRef} className="my-editor"></div>
+      <div style={editorStyle} ref={divRef} className="my-editor"></div>
     </div>
   )
 }
