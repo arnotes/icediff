@@ -8,15 +8,16 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     height: 600,
     webPreferences: {
+      devTools: true,
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: true
     },
-    width: 800,
+    width: 1000,
   });
 
   // and load the index.html of the app.
-  //mainWindow.loadFile(path.join(__dirname, "../index.html"));
-  mainWindow.loadURL("http://localhost:3000");
+  mainWindow.loadFile(path.join(__dirname, "../build/index.html"));
+  //mainWindow.loadURL("http://localhost:3000");
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();

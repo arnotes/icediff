@@ -1,9 +1,12 @@
 // eslint-disable-next-line
 import { GitProcess } from 'dugite';
 import { ICommit } from '../models/commit.interface';
+const path = window.require('path');
 const dugite = window.require('dugite');
 
-const pathToRepository = 'C:/END-Atomology/deploy/end-web';
+//const pathToRepository = 'C:/END-Atomology/deploy/end-web';
+const pathToRepository = path.join('');
+console.log(pathToRepository);
 const sep = '!===!';
 
 const addSep = (str:string)=>{

@@ -2,6 +2,7 @@
   "name": "icediff",
   "version": "0.1.0",
   "private": true,
+  "homepage": "./",
   "main": "build-desktop/main.js",
   "dependencies": {
     "@babel/core": "7.7.4",
@@ -77,8 +78,9 @@
   "scripts": {
     "tsc": "tsc",
     "electron": "tsc -p desktop && electron .",
+    "pack": "electron-packager --overwrite --ignore=\"(^node_modules(?!\/dugite).*|foo*|^src*)\" .",
     "start": "node --max_old_space_size=4096 scripts/start.js",
-    "build": "node scripts/build.js",
+    "build": "node --max_old_space_size=4096 scripts/build.js",
     "test": "node scripts/test.js"
   },
   "eslintConfig": {
@@ -150,5 +152,8 @@
     "presets": [
       "react-app"
     ]
+  },
+  "devDependencies": {
+    "electron-packager": "14.1.1"
   }
 }

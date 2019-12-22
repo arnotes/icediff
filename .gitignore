@@ -11,6 +11,7 @@
 # production
 /build
 /build-desktop
+/icediff-win32-x64
 
 # misc
 .DS_Store
