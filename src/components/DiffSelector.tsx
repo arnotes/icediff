@@ -58,7 +58,7 @@ export default function DiffSelector(props:Props): ReactElement {
     cl.setFile(ev.target.value);
     const {beforeFile,afterFile} = await gitSvc.gitdiffSideBySide(cl.before,cl.after,ev.target.value);
     cl.onViewDiff && cl.onViewDiff(beforeFile,afterFile);
-  },[]);
+  },[cl]);
 
   return (
     <div className="DiffSelector">
