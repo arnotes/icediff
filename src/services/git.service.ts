@@ -24,21 +24,36 @@ class GitService{
 
     branches = branches.map(x => x.replace('* ','').replace('  ',''));
     currentBranch = currentBranch.replace('* ','');
-    console.log({currentBranch,branches});
+
     return {
       currentBranch,
       branches
     }
   }
 
+  async gitdiffSideBySide(beforeHash:string,afterHash:string,fileName:string){
+    const beforeFile = await this.gitShowFile(beforeHash,fileName);
+    const afterFile = await this.gitShowFile(afterHash,fileName);
+    console.log({beforeFile,afterFile});
+    return {beforeFile,afterFile};
+  }
+
+  async gitShowFile(hash:string,fileName:string){
+    const result = await this.exec([
+      'show',
+      `${hash}:${fileName}`
+    ],pathToRepository);
+    return result.stdout;
+  }
+
   async gitdiffFiles(before:string,after:string){
     let files:string[] = [];
-    console.log('gitdiff');
+
     const command = ['diff','--name-only',before,after];
     const result = await this.exec(command,pathToRepository);
-    console.log(result.stdout);
+
     files = splitRaw(result.stdout);
-    console.log({files});
+
     return files;
   }
 
@@ -69,7 +84,7 @@ class GitService{
       const [parent1,parent2] = strParents.split(' ');
       return {hash,strParents,parent1,parent2,refs,subject,email,dateRelative};
     });
-    console.log(parsed);
+
     return parsed;
   }
 }

@@ -6,10 +6,11 @@ import { useController } from '../hooks/useController';
 import { gitSvc } from '../services/git.service';
 
 interface Props{
-  before?:string;
   after?:string;
-  onChangeBeforeAfter?:(before:string,after:string)=>any;
+  before?:string;
   children?:any;
+  onChangeBeforeAfter?:(before:string,after:string)=>any;
+  onViewDiff?:(before:string,after:string)=>any;
 }
 
 export default function DiffSelector(props:Props): ReactElement {
@@ -21,6 +22,7 @@ export default function DiffSelector(props:Props): ReactElement {
     ev.target.select();
   },[]);
   const cl = useController({
+    onViewDiff:props.onViewDiff,
     before:props.before,
     after:props.after,
     setFile,
@@ -51,6 +53,13 @@ export default function DiffSelector(props:Props): ReactElement {
     )
   }),[fileOptions])
 
+  const handleFileSelect = useCallback(async (ev:React.ChangeEvent<HTMLInputElement>)=>{
+    console.log('handleFileSelect');
+    cl.setFile(ev.target.value);
+    const {beforeFile,afterFile} = await gitSvc.gitdiffSideBySide(cl.before,cl.after,ev.target.value);
+    cl.onViewDiff && cl.onViewDiff(beforeFile,afterFile);
+  },[]);
+
   return (
     <div className="DiffSelector">
       <TextField 
@@ -80,7 +89,7 @@ export default function DiffSelector(props:Props): ReactElement {
         select
         disabled={!fileOptions?.length}
         value={file}
-        onChange={e=>setFile(e.target.value)}
+        onChange={handleFileSelect}
         margin="dense"
         type="text" 
         label={!file? 'Select File':'File'}
