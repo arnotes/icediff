@@ -4,9 +4,13 @@ import Drawer from '@material-ui/core/Drawer';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { theme } from '../others/theme';
 import CommitList from './CommitList';
+import DiffSelector from './DiffSelector';
+import { useMergedState } from '../hooks/useMergedState';
+import { ICommit } from '../models/commit.interface';
+import { useController } from '../hooks/useController';
 
 
 const drawerWidth = 400;
@@ -37,15 +41,36 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function ClippedDrawer() {
   const classes = useStyles(theme);
+  const [state,setState] = useMergedState({
+    before:'',
+    after:''
+  });
+  const cl = useController({
+    state,
+    setState
+  });
+
+  const handleClickCommit = useCallback((commit:ICommit)=>{
+    cl.setState(x=>{
+      x.before = commit.hash+'~1';
+      x.after = commit.hash;
+    })
+  },[cl]);
 
   return (
     <div className={classes.root}>
       <CssBaseline />
       <AppBar position="fixed" className={classes.appBar}>
         <Toolbar>
-          <Typography variant="h6" noWrap>
-            Clipped drawer
-          </Typography>
+          <DiffSelector
+            onChangeBeforeAfter={(before,after)=>setState(x=>{
+              x.before = before;
+              x.after = after;
+            })}
+            before={state.before}
+            after={state.after}
+          >
+          </DiffSelector>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -56,7 +81,7 @@ export default function ClippedDrawer() {
         }}
       >
         <div className={classes.toolbar} />
-        <CommitList/>
+        <CommitList onClickCommit={handleClickCommit}/>
       </Drawer>
       <main className={classes.content}>
         <div className={classes.toolbar} />

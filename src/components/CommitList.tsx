@@ -8,15 +8,15 @@ import { ICommit } from '../models/commit.interface';
 import { gitSvc } from '../services/git.service';
 
 interface Props {
-  
+  onClickCommit?:(commit:ICommit)=>any;
 }
 
 const commitsStyle:CSSProperties = {
-  height: `calc(100vh - ${64 + 144}px)`,
+  height: `calc(100vh - ${64 + 136}px)`,
   overflow: 'auto'
 }
 
-const CommitList: React.FC<Props> = () => {
+const CommitList: React.FC<Props> = (props) => {
   const subs = useRef(new Subscription());
   const sbjSearch = useRef(new Subject<string>());
   const [state, setState] = useMergedState({
@@ -29,7 +29,8 @@ const CommitList: React.FC<Props> = () => {
   const controller = useController({
     state,
     setState,
-    subs
+    subs,
+    props
   });
 
   const loadCommits = useCallback(async (ignoreSkip = true) => {
@@ -62,14 +63,15 @@ const CommitList: React.FC<Props> = () => {
   }, [sbjSearch,state.search,state.branch]);
 
   const commitElem = useMemo(() => (state.commits.map(x=>{
+    const onClick = controller.props.onClickCommit;
     return (
-    <ListItem key={x.hash} button>
+    <ListItem key={x.hash} onClick={()=>onClick && onClick(x)} button>
       <ListItemText 
         primary={<small>{x.subject}</small>}
         secondary={<small>{x.hash}</small>}
       />
     </ListItem>);
-  })), [state.commits]);
+  })), [controller, state.commits]);
 
   const branchesElem = useMemo(()=>{
     return state.branches.map(x=>(
@@ -85,6 +87,7 @@ const CommitList: React.FC<Props> = () => {
         <ListItem>
           <TextField fullWidth 
             value={state.search}
+            margin="dense"
             onChange={e=>setState(x=>x.search=e.target.value)}
             type="search" 
             label="Search" 
@@ -94,6 +97,7 @@ const CommitList: React.FC<Props> = () => {
           <TextField fullWidth 
             select
             value={state.branch}
+            margin="dense"
             onChange={e=>setState(x=>x.branch=e.target.value)}
             SelectProps={{
               native: true,

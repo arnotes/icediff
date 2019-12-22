@@ -31,6 +31,17 @@ class GitService{
     }
   }
 
+  async gitdiffFiles(before:string,after:string){
+    let files:string[] = [];
+    console.log('gitdiff');
+    const command = ['diff','--name-only',before,after];
+    const result = await this.exec(command,pathToRepository);
+    console.log(result.stdout);
+    files = splitRaw(result.stdout);
+    console.log({files});
+    return files;
+  }
+
   async gitlog({
       subject = '',
       branches = 'dev',
@@ -55,7 +66,8 @@ class GitService{
     const logs = splitRaw(r.stdout);
     const parsed = logs.map<ICommit>(log => {
       const [hash,strParents,refs,subject,email,dateRelative] = log.split(sep);
-      return {hash,strParents,refs,subject,email,dateRelative};
+      const [parent1,parent2] = strParents.split(' ');
+      return {hash,strParents,parent1,parent2,refs,subject,email,dateRelative};
     });
     console.log(parsed);
     return parsed;
