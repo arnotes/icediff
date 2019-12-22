@@ -37,7 +37,7 @@ const DiffViewer: React.FC<Props> = (props) => {
     if(!diffEditorRef.current){
       return;
     }
-    if(!props.beforeFile && !props.beforeFile){
+    if(!props.beforeFile && !props.afterFile){
       return;
     }
 
