@@ -1,4 +1,4 @@
-import { Divider, List, ListItem, ListItemText, TextField } from '@material-ui/core';
+import { Divider, List, ListItem, ListItemText, TextField, Tooltip } from '@material-ui/core';
 import React, { CSSProperties, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -62,16 +62,37 @@ const CommitList: React.FC<Props> = (props) => {
     sbjSearch.current.next(state.search);
   }, [sbjSearch,state.search,state.branch]);
 
+  const handleRightClickCommit = useCallback((hash:string)=>{
+    const input = document.createElement('input');
+    input.setAttribute('value', hash);
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+  },[])
+
   const commitElem = useMemo(() => (state.commits.map(x=>{
     const onClick = controller.props.onClickCommit;
     return (
-    <ListItem key={x.hash} onClick={()=>onClick && onClick(x)} button>
-      <ListItemText 
-        primary={<small>{x.subject}</small>}
-        secondary={<small>{x.hash}</small>}
-      />
-    </ListItem>);
-  })), [controller, state.commits]);
+      <Tooltip 
+        key={x.hash} 
+        placement="right-start"
+        title="Right-click to copy hash"
+        enterDelay={500} 
+      >
+        <ListItem button
+          onContextMenu={e=>(e.preventDefault() as any) || handleRightClickCommit(x.hash)}
+          data-hash={x.hash}
+          onClick={()=>onClick && onClick(x)}
+        >
+          <ListItemText 
+            primary={<small>{x.subject}</small>}
+            secondary={<small>{x.hash}</small>}
+          />
+        </ListItem>
+      </Tooltip>
+    );
+  })), [controller, state.commits,handleRightClickCommit]);
 
   const branchesElem = useMemo(()=>{
     return state.branches.map(x=>(
