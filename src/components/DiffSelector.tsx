@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { distinctUntilChanged, debounceTime } from 'rxjs/operators';
 import { useController } from '../hooks/useController';
 import { gitSvc } from '../services/git.service';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
 
 interface Props{
   after?:string;
@@ -17,6 +18,8 @@ export default function DiffSelector(props:Props): ReactElement {
   const sbjChangeBeforeAfter = useRef(new Subject<string>());
   const [file, setFile] = useState('');
   const [fileOptions, setFileOptions] = useState([] as string[]);
+  const [filter, setFilter] = useState('');
+  const reg = useDebouncedValue(filter, x => x? new RegExp(x,'i') : undefined);
   const onChangeText = props?.onChangeBeforeAfter;
   const handleFocus = useCallback((ev:React.FocusEvent<HTMLInputElement>)=>{
     ev.target.select();
@@ -47,11 +50,11 @@ export default function DiffSelector(props:Props): ReactElement {
     }
   },[sbjChangeBeforeAfter,cl]);
 
-  const fileOptionsElem = useMemo(()=>fileOptions.map(fileOption=>{
+  const fileOptionsElem = useMemo(()=>fileOptions.filter(fileOption => !reg || fileOption.match(reg)).map(fileOption=>{
     return (
       <option key={fileOption}>{fileOption}</option>
     )
-  }),[fileOptions])
+  }),[fileOptions, reg])
 
   const handleFileSelect = useCallback(async (ev:React.ChangeEvent<HTMLInputElement>)=>{
     console.log('handleFileSelect');
@@ -83,6 +86,18 @@ export default function DiffSelector(props:Props): ReactElement {
         label="After" 
         color="secondary"
         variant="outlined" 
+      />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <TextField 
+        onFocus={handleFocus}
+        value={filter}
+        onChange={e => setFilter(e.target.value)}
+        name="after"
+        margin="dense"
+        type="text" 
+        label="Filter" 
+        color="secondary"
+        variant="outlined" 
       />      
       <TextField 
         style={{width:'400px'}}
@@ -102,6 +117,7 @@ export default function DiffSelector(props:Props): ReactElement {
         <option value=''></option>
         {fileOptionsElem};
       </TextField>
+
     </div>
   )
 }
